@@ -7,9 +7,17 @@ import android.view.Window
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.jetgame.tetris.ui.GameBody
 import com.jetgame.tetris.ui.GameScreen
+import com.jetgame.tetris.ui.PreviewGamescreen
 import com.jetgame.tetris.ui.theme.ComposetetrisTheme
 
 class MainActivity : ComponentActivity() {
@@ -20,7 +28,11 @@ class MainActivity : ComponentActivity() {
             ComposetetrisTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(color = MaterialTheme.colors.background) {
-                    GameScreen()
+                    GameBody {
+                        GameScreen(
+                            Modifier.fillMaxSize()
+                        )
+                    }
                 }
             }
         }
@@ -39,17 +51,12 @@ class MainActivity : ComponentActivity() {
 }
 
 
-
-
-//@Composable
-//fun Greeting(name: String) {
-//    Text(text = "Hello $name!")
-//}
-//
-//@Preview(showBackground = true)
-//@Composable
-//fun DefaultPreview() {
-//    ComposetetrisTheme {
-//        Greeting("Android")
-//    }
-//}
+@Preview(showBackground = true)
+@Composable
+fun DefaultPreview() {
+    ComposetetrisTheme {
+        GameBody {
+            PreviewGamescreen(Modifier.fillMaxSize())
+        }
+    }
+}

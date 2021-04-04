@@ -12,3 +12,6 @@ val BlockSpirit = Color(0xDD000000)
 val BlockPlayground = Color(0x1F000000)
 val BlockHighlight = Color(0xFF560000)
 val ScreenBackground = Color(0xff9ead86)
+
+
+val BodyBackground = Color(0xffefcc19)
