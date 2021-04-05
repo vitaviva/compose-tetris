@@ -11,10 +11,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.jetgame.tetris.logic.Direction
+import com.jetgame.tetris.logic.GameStatus
 import com.jetgame.tetris.logic.GameViewModel
 import com.jetgame.tetris.ui.GameBody
 import com.jetgame.tetris.ui.GameScreen
@@ -33,6 +39,27 @@ class MainActivity : ComponentActivity() {
 
                     val viewModel = viewModel<GameViewModel>()
 
+                    val lifecycleOwner = LocalLifecycleOwner.current
+                    DisposableEffect(key1 = Unit) {
+                        val observer = object : LifecycleObserver {
+                            @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
+                            fun onResume() {
+                                viewModel.dispatch(GameViewModel.Intent.Resume)
+                            }
+
+                            @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+                            fun onPause() {
+                                viewModel.dispatch(GameViewModel.Intent.Pause)
+                            }
+                        }
+                        lifecycleOwner.lifecycle.addObserver(observer)
+                        onDispose {
+                            lifecycleOwner.lifecycle.removeObserver(observer)
+                        }
+
+                    }
+
+
                     GameBody(combinedClickable(
                         onMove = { direction: Direction ->
                             if (direction == Direction.UP) viewModel.dispatch(GameViewModel.Intent.Drop)
@@ -43,6 +70,14 @@ class MainActivity : ComponentActivity() {
                         },
                         onRestart = {
                             viewModel.dispatch(GameViewModel.Intent.Restart)
+                        },
+                        onPause = {
+                            if (viewModel.viewState.value.gameStatus == GameStatus.Running) {
+                                viewModel.dispatch(GameViewModel.Intent.Pause)
+                            } else {
+                                viewModel.dispatch(GameViewModel.Intent.Resume)
+                            }
+
                         }
                     )) {
                         GameScreen(

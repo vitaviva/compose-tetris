@@ -25,10 +25,11 @@ class GameViewModel : ViewModel() {
     }
 
     private fun reduce(state: ViewState, intent: Intent): ViewState = when (intent) {
-        Intent.Restart -> ViewState()
-        Intent.Pause -> state
-        Intent.Resume -> state
-        is Intent.Move -> {
+        Intent.Restart -> ViewState(gameStatus = GameStatus.Running)
+        Intent.Pause -> state.copy(gameStatus = GameStatus.Paused)
+        Intent.Resume -> state.copy(gameStatus = GameStatus.Running)
+        is Intent.Move -> run {
+            if (state.gameStatus != GameStatus.Running) return@run state
             val offset = intent.direction.toOffset()
             val spirit = state.spirit.moveBy(offset)
             if (spirit.isValidInMatrix(state.bricks, state.matrix)) {
@@ -37,7 +38,8 @@ class GameViewModel : ViewModel() {
                 state
             }
         }
-        Intent.Rotate -> {
+        Intent.Rotate -> run {
+            if (state.gameStatus != GameStatus.Running) return@run state
             val spirit = state.spirit.rotate().adjustOffset(state.matrix)
             if (spirit.isValidInMatrix(state.bricks, state.matrix)) {
                 state.copy(spirit = spirit)
@@ -45,7 +47,20 @@ class GameViewModel : ViewModel() {
                 state
             }
         }
+        Intent.Drop -> run {
+            if (state.gameStatus != GameStatus.Running) return@run state
+            var i = 0
+            while (state.spirit.moveBy(0 to ++i)
+                    .isValidInMatrix(state.bricks, state.matrix)
+            ) {
+                //nothing to do
+            }
+            val spirit = state.spirit.moveBy(0 to i - 1)
+
+            state.copy(spirit = spirit)
+        }
         Intent.GameTick -> run {
+            if (state.gameStatus != GameStatus.Running) return@run state
             if (state.spirit != Empty) {
                 val spirit = state.spirit.moveBy(Direction.DOWN.toOffset())
                 if (spirit.isValidInMatrix(state.bricks, state.matrix)) {
@@ -64,17 +79,7 @@ class GameViewModel : ViewModel() {
             )
 
         }
-        Intent.Drop -> {
-            var i = 0
-            while (state.spirit.moveBy(0 to ++i)
-                    .isValidInMatrix(state.bricks, state.matrix)
-            ) {
-                //nothing to do
-            }
-            val spirit = state.spirit.moveBy(0 to i - 1)
 
-            state.copy(spirit = spirit)
-        }
     }
 
     private fun updateBricks(
@@ -106,7 +111,8 @@ class GameViewModel : ViewModel() {
         val bricks: List<Brick> = emptyList(),
         val spirit: Spirit = Empty,
         val spiritReserve: List<Spirit> = emptyList(),
-        val matrix: Pair<Int, Int> = MatrixWidth to MatrixHeight
+        val matrix: Pair<Int, Int> = MatrixWidth to MatrixHeight,
+        val gameStatus: GameStatus = GameStatus.Onboard
     )
 
     sealed class Intent {
@@ -120,6 +126,9 @@ class GameViewModel : ViewModel() {
     }
 }
 
+enum class GameStatus {
+    Onboard, Running, Paused, GameOver
+}
 
 private const val MatrixWidth = 12
 private const val MatrixHeight = 24

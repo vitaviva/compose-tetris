@@ -2,7 +2,6 @@ package com.jetgame.tetris.ui
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -33,7 +32,7 @@ import com.jetgame.tetris.ui.theme.ScreenBackground
 
 @Composable
 fun GameBody(
-    clickable: Clickable = Clickable(),
+    clickable: Clickable = combinedClickable(),
     screen: @Composable () -> Unit
 ) {
 
@@ -139,7 +138,7 @@ fun GameBody(
                     modifier = Modifier
                         .weight(1f)
                         .padding(start = 20.dp, end = 20.dp),
-                    onClick = { },
+                    onClick = { clickable.onPause() },
                     size = SettingButtonSize
                 ) {}
 
@@ -279,16 +278,18 @@ fun DrawScope.drawScreenBorder(
 
 
 data class Clickable constructor(
-    val onMove: (Direction) -> Unit = {},
-    val onRotate: () -> Unit = {},
-    val onRestart: () -> Unit = {},
+    val onMove: (Direction) -> Unit,
+    val onRotate: () -> Unit,
+    val onRestart: () -> Unit,
+    val onPause: () -> Unit
 )
 
 fun combinedClickable(
     onMove: (Direction) -> Unit = {},
     onRotate: () -> Unit = {},
     onRestart: () -> Unit = {},
-) = Clickable(onMove, onRotate, onRestart)
+    onPause: () -> Unit = {},
+) = Clickable(onMove, onRotate, onRestart, onPause)
 
 
 @Preview(widthDp = 400, heightDp = 700)
