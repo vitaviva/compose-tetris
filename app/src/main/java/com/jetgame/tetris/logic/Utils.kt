@@ -30,12 +30,12 @@ val LedFontFamily = FontFamily(
 )
 
 val NextMatrix = 4 to 2
+val ScoreEverySpirit = 12
 
-
-object TT {
-    val tt:Int = 0
-}
-
-fun main() {
-    TT.tt
+fun calculateScore(lines: Int) = when (lines) {
+    1 -> 100
+    2 -> 300
+    3 -> 700
+    4 -> 1500
+    else -> 0
 }

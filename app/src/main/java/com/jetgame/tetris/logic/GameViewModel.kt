@@ -67,11 +67,15 @@ class GameViewModel : ViewModel() {
                     return@run state.copy(spirit = spirit)
                 }
             }
+            val (newBricks, lines) = updateBricks(state.bricks, state.spirit, matrix = state.matrix)
             state.copy(
                 spirit = state.spiritNext,
                 spiritReserve = (state.spiritReserve - state.spiritNext).takeIf { it.isNotEmpty() }
                     ?: generateSpiritReverse(state.matrix),
-                bricks = updateBricks(state.bricks, state.spirit, matrix = state.matrix)
+                bricks = newBricks,
+                score = state.score + calculateScore(lines) +
+                        if (state.spirit != Empty) ScoreEverySpirit else 0,
+                line = state.line + lines
             )
 
         }
@@ -82,7 +86,7 @@ class GameViewModel : ViewModel() {
         curBricks: List<Brick>,
         spirit: Spirit,
         matrix: Pair<Int, Int>
-    ): List<Brick> {
+    ): Pair<List<Brick>, Int> {
         val bricks = (curBricks + Brick.of(spirit))
         val map = mutableMapOf<Float, MutableSet<Float>>()
         bricks.forEach {
@@ -91,16 +95,18 @@ class GameViewModel : ViewModel() {
             }.add(it.location.x)
         }
         var res = bricks
+        var lines = 0
         map.entries.sortedBy { it.key }.forEach { entry ->
             if (entry.value.size == matrix.first) {
                 //clear line
+                lines++
                 res = res.filter { it.location.y != entry.key }
                     .map { if (it.location.y < entry.key) it.offsetBy(0 to 1) else it }
 
             }
         }
 
-        return res
+        return res to lines
     }
 
     data class ViewState(
@@ -108,7 +114,9 @@ class GameViewModel : ViewModel() {
         val spirit: Spirit = Empty,
         val spiritReserve: List<Spirit> = emptyList(),
         val matrix: Pair<Int, Int> = MatrixWidth to MatrixHeight,
-        val gameStatus: GameStatus = GameStatus.Onboard
+        val gameStatus: GameStatus = GameStatus.Onboard,
+        val score: Int = 0,
+        val line: Int = 0
     ) {
         val spiritNext: Spirit
             get() = spiritReserve.firstOrNull() ?: Empty

@@ -78,7 +78,12 @@ fun GameScreen(modifier: Modifier = Modifier) {
         }
 
         GameScoreboard(
-            spirit = viewState.spiritNext.rotate()
+            spirit = run {
+                if (viewState.spirit == Spirit.Empty) Spirit.Empty
+                else viewState.spiritNext.rotate()
+            },
+            score = viewState.score,
+            line = viewState.line
         )
 
     }
@@ -89,7 +94,9 @@ fun GameScreen(modifier: Modifier = Modifier) {
 fun GameScoreboard(
     modifier: Modifier = Modifier,
     brickSize: Float = 35f,
-    spirit: Spirit
+    spirit: Spirit,
+    score: Int = 0,
+    line: Int = 0
 ) {
     Row(modifier.fillMaxSize()) {
         Spacer(modifier = Modifier.weight(0.65f))
@@ -101,12 +108,12 @@ fun GameScoreboard(
                 .weight(0.35f)
         ) {
             Text("Score", fontSize = textSize)
-            LedNumber(Modifier.fillMaxWidth(), 123, 6)
+            LedNumber(Modifier.fillMaxWidth(), score, 6)
 
             Spacer(modifier = Modifier.height(margin))
 
             Text("Lines", fontSize = textSize)
-            LedNumber(Modifier.fillMaxWidth(), 11, 6)
+            LedNumber(Modifier.fillMaxWidth(), line, 6)
 
             Spacer(modifier = Modifier.height(margin))
 
@@ -152,7 +159,6 @@ fun GameScoreboard(
         }
     }
 }
-
 
 
 private fun DrawScope.drawMatrix(brickSize: Float, matrix: Pair<Int, Int>) {
@@ -279,7 +285,9 @@ fun PreviewGamescreen(
 
         val type = SpiritType[6]
         GameScoreboard(
-            spirit = Spirit(type, Offset(0f, 0f)).rotate()
+            spirit = Spirit(type, Offset(0f, 0f)).rotate(),
+            score = 1204,
+            line = 12
         )
 
     }

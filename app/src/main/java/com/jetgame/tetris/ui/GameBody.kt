@@ -59,8 +59,8 @@ fun GameBody(
 
             Box(
                 Modifier
-                    .width(100.dp)
-                    .height(50.dp)
+                    .width(120.dp)
+                    .height(45.dp)
                     .align(Alignment.TopCenter)
                     .background(BodyColor)
             ) {
@@ -69,7 +69,8 @@ fun GameBody(
                     modifier = Modifier.align(Alignment.Center),
                     textAlign = TextAlign.Center,
                     fontFamily = FontFamily.Cursive,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp
                 )
 
             }
@@ -160,11 +161,12 @@ fun GameBody(
 
 
         //Game Button
-        val ButtonText = @Composable { text: String, modifier: Modifier ->
+        val ButtonText = @Composable { modifier: Modifier,
+                                       text: String ->
             Text(
                 text, modifier = modifier,
                 color = Color.White.copy(0.9f),
-                fontSize = 20.sp
+                fontSize = 18.sp
             )
         }
 
@@ -185,7 +187,7 @@ fun GameBody(
                     autoInvokeWhenPressed = false,
                     size = DirectionButtonSize
                 ) {
-                    ButtonText("▲", it)
+                    ButtonText(it, "▲")
                 }
                 GameButton(
                     Modifier.align(Alignment.CenterStart),
@@ -193,7 +195,7 @@ fun GameBody(
                     autoInvokeWhenPressed = true,
                     size = DirectionButtonSize
                 ) {
-                    ButtonText("◀", it)
+                    ButtonText(it, "◀")
                 }
                 GameButton(
                     Modifier.align(Alignment.CenterEnd),
@@ -201,7 +203,7 @@ fun GameBody(
                     autoInvokeWhenPressed = true,
                     size = DirectionButtonSize
                 ) {
-                    ButtonText("▶", it)
+                    ButtonText(it, "▶")
                 }
                 GameButton(
                     Modifier.align(Alignment.BottomCenter),
@@ -209,7 +211,7 @@ fun GameBody(
                     autoInvokeWhenPressed = true,
                     size = DirectionButtonSize
                 ) {
-                    ButtonText("▼", it)
+                    ButtonText(it, "▼")
                 }
 
             }
@@ -227,7 +229,7 @@ fun GameBody(
                     autoInvokeWhenPressed = true,
                     size = RotateButtonSize
                 ) {
-                    ButtonText("ROTATE", it)
+                    ButtonText(it, "ROTATE")
                 }
             }
         }
