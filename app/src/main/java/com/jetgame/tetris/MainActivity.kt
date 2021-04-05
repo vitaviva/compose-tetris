@@ -8,16 +8,18 @@ import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.jetgame.tetris.logic.Direction
+import com.jetgame.tetris.logic.GameViewModel
 import com.jetgame.tetris.ui.GameBody
 import com.jetgame.tetris.ui.GameScreen
 import com.jetgame.tetris.ui.PreviewGamescreen
+import com.jetgame.tetris.ui.combinedClickable
 import com.jetgame.tetris.ui.theme.ComposetetrisTheme
 
 class MainActivity : ComponentActivity() {
@@ -28,7 +30,21 @@ class MainActivity : ComponentActivity() {
             ComposetetrisTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(color = MaterialTheme.colors.background) {
-                    GameBody {
+
+                    val viewModel = viewModel<GameViewModel>()
+
+                    GameBody(combinedClickable(
+                        onMove = { direction: Direction ->
+                            if (direction == Direction.UP) viewModel.dispatch(GameViewModel.Intent.Drop)
+                            else viewModel.dispatch(GameViewModel.Intent.Move(direction))
+                        },
+                        onRotate = {
+                            viewModel.dispatch(GameViewModel.Intent.Rotate)
+                        },
+                        onRestart = {
+                            viewModel.dispatch(GameViewModel.Intent.Restart)
+                        }
+                    )) {
                         GameScreen(
                             Modifier.fillMaxSize()
                         )

@@ -1,13 +1,10 @@
 package com.jetgame.tetris.ui
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
@@ -18,24 +15,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.ClipOp
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PaintingStyle
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.DrawStyle
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.scale
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.jetgame.tetris.R
 import com.jetgame.tetris.logic.Brick
 import com.jetgame.tetris.logic.GameViewModel
 import com.jetgame.tetris.logic.Spirit
-import com.jetgame.tetris.ui.theme.BlockPlayground
+import com.jetgame.tetris.ui.theme.BlockMatrix
 import com.jetgame.tetris.ui.theme.BlockSpirit
 import com.jetgame.tetris.ui.theme.ScreenBackground
 import kotlinx.coroutines.ObsoleteCoroutinesApi
@@ -72,38 +63,39 @@ fun GameScreen(modifier: Modifier = Modifier) {
         ) {
 
             val brickSize = min(
-                size.width / viewState.playground.first,
-                size.height / viewState.playground.second
+                size.width / viewState.matrix.first,
+                size.height / viewState.matrix.second
             )
 
-            drawPlayground(brickSize = brickSize, viewState.playground)
-            drawBricks(viewState.bricks, brickSize)
-            drawSpirit(viewState.spirit, brickSize)
+            drawMatrix(brickSize, viewState.matrix)
+            drawBricks(viewState.bricks, brickSize, viewState.matrix)
+            drawSpirit(viewState.spirit, brickSize, viewState.matrix)
+
         }
     }
 
 }
 
 
-fun DrawScope.drawPlayground(brickSize: Float, playground: Pair<Int, Int>) {
-    (0 until playground.first).forEach { x ->
-        (0 until playground.second).forEach { y ->
+fun DrawScope.drawMatrix(brickSize: Float, matrix: Pair<Int, Int>) {
+    (0 until matrix.first).forEach { x ->
+        (0 until matrix.second).forEach { y ->
             drawBrick(
                 brickSize,
                 Offset(x.toFloat(), y.toFloat()),
-                BlockPlayground
+                BlockMatrix
             )
         }
     }
 
     //draw border
-    val gap = playground.first * brickSize * 0.05f
+    val gap = matrix.first * brickSize * 0.05f
     scale(1.0f) {
         drawRect(
             Color.Black,
             size = Size(
-                playground.first * brickSize + gap,
-                playground.second * brickSize + gap
+                matrix.first * brickSize + gap,
+                matrix.second * brickSize + gap
             ),
             topLeft = Offset(
                 -gap / 2,
@@ -114,19 +106,31 @@ fun DrawScope.drawPlayground(brickSize: Float, playground: Pair<Int, Int>) {
     }
 }
 
-fun DrawScope.drawBricks(brick: List<Brick>, brickSize: Float) {
-    brick.forEach {
-        drawBrick(brickSize, it.location, BlockSpirit)
+fun DrawScope.drawBricks(brick: List<Brick>, brickSize: Float, matrix: Pair<Int, Int>) {
+    clipRect(
+        0f, 0f,
+        matrix.first * brickSize,
+        matrix.second * brickSize
+    ) {
+        brick.forEach {
+            drawBrick(brickSize, it.location, BlockSpirit)
+        }
     }
 }
 
-fun DrawScope.drawSpirit(spirit: Spirit, brickSize: Float) {
-    spirit.location.forEach {
-        drawBrick(
-            brickSize,
-            Offset(it.x, it.y),
-            BlockSpirit
-        )
+fun DrawScope.drawSpirit(spirit: Spirit, brickSize: Float, matrix: Pair<Int, Int>) {
+    clipRect(
+        0f, 0f,
+        matrix.first * brickSize,
+        matrix.second * brickSize
+    ) {
+        spirit.location.forEach {
+            drawBrick(
+                brickSize,
+                Offset(it.x, it.y),
+                BlockSpirit
+            )
+        }
     }
 }
 
@@ -167,7 +171,7 @@ fun DrawScope.drawBrick(
 @Composable
 fun PreviewGamescreen(
     modifier: Modifier = Modifier
-        .width(220.dp)
+        .width(180.dp)
         .height(200.dp)
 ) {
 
@@ -190,7 +194,7 @@ fun PreviewGamescreen(
                 size.height / 24
             )
 
-            drawPlayground(brickSize = brickSize, 12 to 24)
+            drawMatrix(brickSize = brickSize, 12 to 24)
 
         }
 

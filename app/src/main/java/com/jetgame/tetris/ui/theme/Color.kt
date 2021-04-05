@@ -9,9 +9,9 @@ val Teal200 = Color(0xFF03DAC5)
 
 
 val BlockSpirit = Color(0xDD000000)
-val BlockPlayground = Color(0x1F000000)
+val BlockMatrix = Color(0x1F000000)
 val BlockHighlight = Color(0xFF560000)
 val ScreenBackground = Color(0xff9ead86)
 
 
-val BodyBackground = Color(0xffefcc19)
+val BodyColor = Color(0xffefcc19)
