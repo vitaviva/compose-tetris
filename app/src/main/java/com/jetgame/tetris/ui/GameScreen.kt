@@ -1,36 +1,47 @@
 package com.jetgame.tetris.ui
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
-import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.jetgame.tetris.R
 import com.jetgame.tetris.logic.Brick
 import com.jetgame.tetris.logic.GameViewModel
+import com.jetgame.tetris.logic.NextMatrix
 import com.jetgame.tetris.logic.Spirit
-import com.jetgame.tetris.ui.theme.BlockMatrix
-import com.jetgame.tetris.ui.theme.BlockSpirit
+import com.jetgame.tetris.logic.SpiritType
+import com.jetgame.tetris.ui.theme.BrickMatrix
+import com.jetgame.tetris.ui.theme.BrickSpirit
 import com.jetgame.tetris.ui.theme.ScreenBackground
 import kotlinx.coroutines.ObsoleteCoroutinesApi
-import kotlinx.coroutines.channels.ticker
 import kotlin.math.min
 
 @ObsoleteCoroutinesApi
@@ -39,14 +50,6 @@ fun GameScreen(modifier: Modifier = Modifier) {
 
     val viewModel = viewModel<GameViewModel>()
     val viewState by viewModel.viewState.collectAsState()
-
-    val tickerChannel = remember { ticker(delayMillis = 200) }
-
-    LaunchedEffect(key1 = Unit) {
-        for (event in tickerChannel) {
-            viewModel.dispatch(GameViewModel.Intent.GameTick)
-        }
-    }
 
     Box(
         modifier
@@ -68,57 +71,133 @@ fun GameScreen(modifier: Modifier = Modifier) {
             )
 
             drawMatrix(brickSize, viewState.matrix)
+            drawMatrixBorder(brickSize, viewState.matrix)
             drawBricks(viewState.bricks, brickSize, viewState.matrix)
             drawSpirit(viewState.spirit, brickSize, viewState.matrix)
 
         }
+
+        GameScoreboard(
+            spirit = viewState.spiritNext.rotate()
+        )
+
     }
 
 }
 
+@Composable
+fun GameScoreboard(
+    modifier: Modifier = Modifier,
+    brickSize: Float = 35f,
+    spirit: Spirit
+) {
+    Row(modifier.fillMaxSize()) {
+        Spacer(modifier = Modifier.weight(0.65f))
+        val textSize = 12.sp
+        val margin = 12.dp
+        Column(
+            Modifier
+                .fillMaxHeight()
+                .weight(0.35f)
+        ) {
+            Text("Score", fontSize = textSize)
+            LedNumber(Modifier.fillMaxWidth(), 123, 6)
 
-fun DrawScope.drawMatrix(brickSize: Float, matrix: Pair<Int, Int>) {
+            Spacer(modifier = Modifier.height(margin))
+
+            Text("Lines", fontSize = textSize)
+            LedNumber(Modifier.fillMaxWidth(), 11, 6)
+
+            Spacer(modifier = Modifier.height(margin))
+
+            Text("Level", fontSize = textSize)
+            LedNumber(Modifier.fillMaxWidth(), 1, 1)
+
+            Spacer(modifier = Modifier.height(margin))
+
+            Text("Next", fontSize = textSize)
+            Canvas(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.CenterHorizontally)
+                    .padding(10.dp)
+            ) {
+                drawMatrix(brickSize, NextMatrix)
+                drawSpirit(
+                    spirit.adjustOffset(NextMatrix),
+                    brickSize = brickSize, NextMatrix
+                )
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
+            Row {
+                Image(
+                    modifier = Modifier.width(15.dp),
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_baseline_music_off_24),
+                    colorFilter = ColorFilter.tint(BrickSpirit),
+                    contentDescription = null
+                )
+                Image(
+                    modifier = Modifier.width(16.dp),
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_baseline_pause_24),
+                    colorFilter = ColorFilter.tint(BrickSpirit),
+                    contentDescription = null
+                )
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                LedClock()
+
+            }
+        }
+    }
+}
+
+
+
+private fun DrawScope.drawMatrix(brickSize: Float, matrix: Pair<Int, Int>) {
     (0 until matrix.first).forEach { x ->
         (0 until matrix.second).forEach { y ->
             drawBrick(
                 brickSize,
                 Offset(x.toFloat(), y.toFloat()),
-                BlockMatrix
+                BrickMatrix
             )
         }
     }
-
-    //draw border
-    val gap = matrix.first * brickSize * 0.05f
-    scale(1.0f) {
-        drawRect(
-            Color.Black,
-            size = Size(
-                matrix.first * brickSize + gap,
-                matrix.second * brickSize + gap
-            ),
-            topLeft = Offset(
-                -gap / 2,
-                -gap / 2
-            ),
-            style = Stroke(1f)
-        )
-    }
 }
 
-fun DrawScope.drawBricks(brick: List<Brick>, brickSize: Float, matrix: Pair<Int, Int>) {
+private fun DrawScope.drawMatrixBorder(brickSize: Float, matrix: Pair<Int, Int>) {
+
+    val gap = matrix.first * brickSize * 0.05f
+    drawRect(
+        Color.Black,
+        size = Size(
+            matrix.first * brickSize + gap,
+            matrix.second * brickSize + gap
+        ),
+        topLeft = Offset(
+            -gap / 2,
+            -gap / 2
+        ),
+        style = Stroke(1.dp.toPx())
+    )
+
+}
+
+private fun DrawScope.drawBricks(brick: List<Brick>, brickSize: Float, matrix: Pair<Int, Int>) {
     clipRect(
         0f, 0f,
         matrix.first * brickSize,
         matrix.second * brickSize
     ) {
         brick.forEach {
-            drawBrick(brickSize, it.location, BlockSpirit)
+            drawBrick(brickSize, it.location, BrickSpirit)
         }
     }
 }
 
-fun DrawScope.drawSpirit(spirit: Spirit, brickSize: Float, matrix: Pair<Int, Int>) {
+private fun DrawScope.drawSpirit(spirit: Spirit, brickSize: Float, matrix: Pair<Int, Int>) {
     clipRect(
         0f, 0f,
         matrix.first * brickSize,
@@ -128,13 +207,13 @@ fun DrawScope.drawSpirit(spirit: Spirit, brickSize: Float, matrix: Pair<Int, Int
             drawBrick(
                 brickSize,
                 Offset(it.x, it.y),
-                BlockSpirit
+                BrickSpirit
             )
         }
     }
 }
 
-fun DrawScope.drawBrick(
+private fun DrawScope.drawBrick(
     brickSize: Float,
     offset: Offset,
     color: Color
@@ -171,8 +250,8 @@ fun DrawScope.drawBrick(
 @Composable
 fun PreviewGamescreen(
     modifier: Modifier = Modifier
-        .width(180.dp)
-        .height(200.dp)
+        .width(260.dp)
+        .height(300.dp)
 ) {
 
     Box(
@@ -195,8 +274,13 @@ fun PreviewGamescreen(
             )
 
             drawMatrix(brickSize = brickSize, 12 to 24)
-
+            drawMatrixBorder(brickSize = brickSize, 12 to 24)
         }
+
+        val type = SpiritType[6]
+        GameScoreboard(
+            spirit = Spirit(type, Offset(0f, 0f)).rotate()
+        )
 
     }
 

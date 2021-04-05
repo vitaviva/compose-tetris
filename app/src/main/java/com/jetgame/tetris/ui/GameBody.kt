@@ -40,6 +40,7 @@ fun GameBody(
         Modifier
             .fillMaxSize()
             .background(BodyColor)
+            .padding(top = 20.dp)
     ) {
 
         //Screen
@@ -49,7 +50,7 @@ fun GameBody(
             Box(
                 modifier = Modifier
                     .align(Alignment.Center)
-                    .size(330.dp, 420.dp)
+                    .size(330.dp, 400.dp)
                     .padding(top = 20.dp)
                     .background(Color.Black.copy(alpha = 0.8f))
                     .padding(5.dp)
@@ -76,7 +77,7 @@ fun GameBody(
             Box(
                 Modifier
                     .align(Alignment.Center)
-                    .size(360.dp, 400.dp)
+                    .size(360.dp, 380.dp)
                     .padding(start = 50.dp, end = 50.dp, top = 50.dp, bottom = 30.dp)
             ) {
                 Canvas(modifier = Modifier.fillMaxSize()) {

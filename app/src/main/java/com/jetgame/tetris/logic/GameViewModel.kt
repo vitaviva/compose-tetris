@@ -67,14 +67,10 @@ class GameViewModel : ViewModel() {
                     return@run state.copy(spirit = spirit)
                 }
             }
-            val reserve =
-                if (state.spiritReserve.isEmpty())
-                    generateSpiritReverse(state.matrix)
-                else state.spiritReserve
-            val spirit = reserve.first()
             state.copy(
-                spirit = spirit,
-                spiritReserve = reserve - spirit,
+                spirit = state.spiritNext,
+                spiritReserve = (state.spiritReserve - state.spiritNext).takeIf { it.isNotEmpty() }
+                    ?: generateSpiritReverse(state.matrix),
                 bricks = updateBricks(state.bricks, state.spirit, matrix = state.matrix)
             )
 
@@ -113,7 +109,10 @@ class GameViewModel : ViewModel() {
         val spiritReserve: List<Spirit> = emptyList(),
         val matrix: Pair<Int, Int> = MatrixWidth to MatrixHeight,
         val gameStatus: GameStatus = GameStatus.Onboard
-    )
+    ) {
+        val spiritNext: Spirit
+            get() = spiritReserve.firstOrNull() ?: Empty
+    }
 
     sealed class Intent {
         data class Move(val direction: Direction) : Intent()

@@ -11,7 +11,8 @@ data class Spirit(
 ) {
     val location: List<Offset> = shape.map { it + offset }
 
-    fun moveBy(step: Pair<Int, Int>): Spirit = copy(offset = offset + Offset(step.first, step.second))
+    fun moveBy(step: Pair<Int, Int>): Spirit =
+        copy(offset = offset + Offset(step.first, step.second))
 
     fun rotate(): Spirit {
         val newShape = shape.toMutableList()
@@ -21,16 +22,18 @@ data class Spirit(
         return copy(shape = newShape)
     }
 
-    fun adjustOffset(matrix: Pair<Int, Int>): Spirit {
-//        val yOffset =
-//            (location.minByOrNull { it.y }?.y?.takeIf { it < 0 }?.absoluteValue ?: 0).toInt() +
-//                    (location.maxByOrNull { it.y }?.y?.takeIf { it > matrix.second - 1 }
-//                        ?.let { matrix.second - it - 1 } ?: 0).toInt()
+    fun adjustOffset(matrix: Pair<Int, Int>, adjustY: Boolean = true): Spirit {
+        val yOffset =
+            if (adjustY)
+                (location.minByOrNull { it.y }?.y?.takeIf { it < 0 }?.absoluteValue ?: 0).toInt() +
+                        (location.maxByOrNull { it.y }?.y?.takeIf { it > matrix.second - 1 }
+                            ?.let { matrix.second - it - 1 } ?: 0).toInt()
+            else 0
         val xOffset =
             (location.minByOrNull { it.x }?.x?.takeIf { it < 0 }?.absoluteValue ?: 0).toInt() +
                     (location.maxByOrNull { it.x }?.x?.takeIf { it > matrix.first - 1 }
                         ?.let { matrix.first - it - 1 } ?: 0).toInt()
-        return moveBy(xOffset to 0)
+        return moveBy(xOffset to yOffset)
     }
 
     companion object {
@@ -39,14 +42,14 @@ data class Spirit(
 }
 
 
-private val SpiritType = listOf(
-    listOf(Offset(1, -1), Offset(1, 0), Offset(0, 0), Offset(0, 1)),
-    listOf(Offset(0, -1), Offset(0, 0), Offset(1, 0), Offset(1, 1)),
-    listOf(Offset(0, -1), Offset(0, 0), Offset(0, 1), Offset(0, 2)),
-    listOf(Offset(0, 1), Offset(0, 0), Offset(0, -1), Offset(1, 0)),
-    listOf(Offset(1, 0), Offset(0, 0), Offset(1, -1), Offset(0, -1)),
-    listOf(Offset(0, -1), Offset(1, -1), Offset(1, 0), Offset(1, 1)),
-    listOf(Offset(1, -1), Offset(0, -1), Offset(0, 0), Offset(0, 1))
+val SpiritType = listOf(
+    listOf(Offset(1, -1), Offset(1, 0), Offset(0, 0), Offset(0, 1)),//Z
+    listOf(Offset(0, -1), Offset(0, 0), Offset(1, 0), Offset(1, 1)),//S
+    listOf(Offset(0, -1), Offset(0, 0), Offset(0, 1), Offset(0, 2)),//I
+    listOf(Offset(0, 1), Offset(0, 0), Offset(0, -1), Offset(1, 0)),//T
+    listOf(Offset(1, 0), Offset(0, 0), Offset(1, -1), Offset(0, -1)),//O
+    listOf(Offset(0, -1), Offset(1, -1), Offset(1, 0), Offset(1, 1)),//L
+    listOf(Offset(1, -1), Offset(0, -1), Offset(0, 0), Offset(0, 1))//J
 )
 
 
@@ -60,6 +63,6 @@ fun Spirit.isValidInMatrix(blocks: List<Brick>, matrix: Pair<Int, Int>): Boolean
 
 fun generateSpiritReverse(matrix: Pair<Int, Int>): List<Spirit> {
     return SpiritType.map {
-        Spirit(it, Offset(Random.nextInt(matrix.first - 1), -1)).adjustOffset(matrix)
+        Spirit(it, Offset(Random.nextInt(matrix.first - 1), -1)).adjustOffset(matrix, false)
     }.shuffled()
 }

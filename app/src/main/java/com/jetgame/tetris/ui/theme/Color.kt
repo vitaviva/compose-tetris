@@ -8,9 +8,9 @@ val Purple700 = Color(0xFF3700B3)
 val Teal200 = Color(0xFF03DAC5)
 
 
-val BlockSpirit = Color(0xDD000000)
-val BlockMatrix = Color(0x1F000000)
-val BlockHighlight = Color(0xFF560000)
+val BrickSpirit = Color(0xDD000000)
+val BrickMatrix = Color(0x1F000000)
+val BrickHighlight = Color(0xFF560000)
 val ScreenBackground = Color(0xff9ead86)
 
 

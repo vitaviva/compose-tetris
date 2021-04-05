@@ -12,6 +12,8 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.tooling.preview.Preview
@@ -27,6 +29,7 @@ import com.jetgame.tetris.ui.GameScreen
 import com.jetgame.tetris.ui.PreviewGamescreen
 import com.jetgame.tetris.ui.combinedClickable
 import com.jetgame.tetris.ui.theme.ComposetetrisTheme
+import kotlinx.coroutines.channels.ticker
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,6 +41,13 @@ class MainActivity : ComponentActivity() {
                 Surface(color = MaterialTheme.colors.background) {
 
                     val viewModel = viewModel<GameViewModel>()
+
+                    val tickerChannel = remember { ticker(delayMillis = 200) }
+                    LaunchedEffect(key1 = Unit) {
+                        for (event in tickerChannel) {
+                            viewModel.dispatch(GameViewModel.Intent.GameTick)
+                        }
+                    }
 
                     val lifecycleOwner = LocalLifecycleOwner.current
                     DisposableEffect(key1 = Unit) {
