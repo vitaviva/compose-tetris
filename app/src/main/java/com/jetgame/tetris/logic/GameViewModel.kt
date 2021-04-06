@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jetgame.tetris.logic.Spirit.Companion.Empty
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -16,77 +17,112 @@ class GameViewModel : ViewModel() {
     val viewState = _viewState.asStateFlow()
 
 
-    fun dispatch(intent: Intent) {
+    fun dispatch(action: Action) =
+        reduce(viewState.value, action)
+
+
+    private fun reduce(state: ViewState, action: Action) {
         viewModelScope.launch {
             withContext(Dispatchers.Default) {
-                _viewState.value = reduce(viewState.value, intent)
-            }
-        }
-    }
+                _viewState.value = when (action) {
+                    Action.Restart -> ViewState(gameStatus = GameStatus.Running)
+                    Action.Pause -> state.copy(gameStatus = GameStatus.Paused)
+                    Action.Resume -> state.copy(gameStatus = GameStatus.Running)
+                    is Action.Move -> run {
+                        if (state.gameStatus != GameStatus.Running) return@run state
+                        val offset = action.direction.toOffset()
+                        val spirit = state.spirit.moveBy(offset)
+                        if (spirit.isValidInMatrix(state.bricks, state.matrix)) {
+                            state.copy(spirit = spirit)
+                        } else {
+                            state
+                        }
+                    }
+                    Action.Rotate -> run {
+                        if (state.gameStatus != GameStatus.Running) return@run state
+                        val spirit = state.spirit.rotate().adjustOffset(state.matrix)
+                        if (spirit.isValidInMatrix(state.bricks, state.matrix)) {
+                            state.copy(spirit = spirit)
+                        } else {
+                            state
+                        }
+                    }
+                    Action.Drop -> run {
+                        if (state.gameStatus != GameStatus.Running) return@run state
+                        var i = 0
+                        while (state.spirit.moveBy(0 to ++i)
+                                .isValidInMatrix(state.bricks, state.matrix)
+                        ) { //nothing to do
+                        }
+                        val spirit = state.spirit.moveBy(0 to i - 1)
 
-    private fun reduce(state: ViewState, intent: Intent): ViewState = when (intent) {
-        Intent.Restart -> ViewState(gameStatus = GameStatus.Running)
-        Intent.Pause -> state.copy(gameStatus = GameStatus.Paused)
-        Intent.Resume -> state.copy(gameStatus = GameStatus.Running)
-        is Intent.Move -> run {
-            if (state.gameStatus != GameStatus.Running) return@run state
-            val offset = intent.direction.toOffset()
-            val spirit = state.spirit.moveBy(offset)
-            if (spirit.isValidInMatrix(state.bricks, state.matrix)) {
-                state.copy(spirit = spirit)
-            } else {
-                state
-            }
-        }
-        Intent.Rotate -> run {
-            if (state.gameStatus != GameStatus.Running) return@run state
-            val spirit = state.spirit.rotate().adjustOffset(state.matrix)
-            if (spirit.isValidInMatrix(state.bricks, state.matrix)) {
-                state.copy(spirit = spirit)
-            } else {
-                state
-            }
-        }
-        Intent.Drop -> run {
-            if (state.gameStatus != GameStatus.Running) return@run state
-            var i = 0
-            while (state.spirit.moveBy(0 to ++i)
-                    .isValidInMatrix(state.bricks, state.matrix)
-            ) {
-                //nothing to do
-            }
-            val spirit = state.spirit.moveBy(0 to i - 1)
-
-            state.copy(spirit = spirit)
-        }
-        Intent.GameTick -> run {
-            if (state.gameStatus != GameStatus.Running) return@run state
-            if (state.spirit != Empty) {
-                val spirit = state.spirit.moveBy(Direction.DOWN.toOffset())
-                if (spirit.isValidInMatrix(state.bricks, state.matrix)) {
-                    return@run state.copy(spirit = spirit)
+                        state.copy(spirit = spirit)
+                    }
+                    Action.GameTick -> run {
+                        if (state.gameStatus != GameStatus.Running) return@run state
+                        if (state.spirit != Empty) {
+                            val spirit = state.spirit.moveBy(Direction.Down.toOffset())
+                            if (spirit.isValidInMatrix(state.bricks, state.matrix)) {
+                                return@run state.copy(spirit = spirit)
+                            }
+                        }
+                        val (updatedBricks, clearedLines) = updateBricks(
+                            state.bricks,
+                            state.spirit,
+                            matrix = state.matrix
+                        )
+                        val (noClear, clearing, cleared) = updatedBricks
+                        val newState = state.copy(
+                            spirit = state.spiritNext,
+                            spiritReserve = (state.spiritReserve - state.spiritNext).takeIf { it.isNotEmpty() }
+                                ?: generateSpiritReverse(state.matrix),
+                            score = state.score + calculateScore(clearedLines) +
+                                    if (state.spirit != Empty) ScoreEverySpirit else 0,
+                            line = state.line + clearedLines
+                        )
+                        if (clearedLines != 0) {// has cleared lines
+                            state.copy(
+                                gameStatus = GameStatus.LineClearing
+                            ).also {
+                                launch {
+                                    //animate the clearing lines
+                                    repeat(5) {
+                                        _viewState.value =
+                                            state.copy(
+                                                gameStatus = GameStatus.LineClearing,
+                                                spirit = Empty,
+                                                bricks = if (it % 2 == 0) noClear else clearing
+                                            )
+                                        delay(100)
+                                    }
+                                    //delay emit new state
+                                    _viewState.value = newState.copy(
+                                        bricks = cleared,
+                                        gameStatus = GameStatus.Running
+                                    )
+                                }
+                            }
+                        } else {
+                            newState.copy(bricks = noClear)
+                        }
+                    }
                 }
             }
-            val (newBricks, lines) = updateBricks(state.bricks, state.spirit, matrix = state.matrix)
-            state.copy(
-                spirit = state.spiritNext,
-                spiritReserve = (state.spiritReserve - state.spiritNext).takeIf { it.isNotEmpty() }
-                    ?: generateSpiritReverse(state.matrix),
-                bricks = newBricks,
-                score = state.score + calculateScore(lines) +
-                        if (state.spirit != Empty) ScoreEverySpirit else 0,
-                line = state.line + lines
-            )
-
         }
 
     }
 
+    /**
+     * Return a [Triple] to store clear-info for bricks:
+     * - [Triple.first]:  Bricks before line clearing (Current bricks plus Spirit)
+     * - [Triple.second]: Bricks after line cleared but not offset (bricks minus lines should be cleared)
+     * - [Triple.third]: Bricks after line cleared (after bricks offset)
+     */
     private fun updateBricks(
         curBricks: List<Brick>,
         spirit: Spirit,
         matrix: Pair<Int, Int>
-    ): Pair<List<Brick>, Int> {
+    ): Pair<Triple<List<Brick>, List<Brick>, List<Brick>>, Int> {
         val bricks = (curBricks + Brick.of(spirit))
         val map = mutableMapOf<Float, MutableSet<Float>>()
         bricks.forEach {
@@ -94,19 +130,20 @@ class GameViewModel : ViewModel() {
                 mutableSetOf()
             }.add(it.location.x)
         }
-        var res = bricks
-        var lines = 0
-        map.entries.sortedBy { it.key }.forEach { entry ->
-            if (entry.value.size == matrix.first) {
+        var clearing = bricks
+        var cleared = bricks
+        val clearLines = map.entries.sortedBy { it.key }
+            .filter { it.value.size == matrix.first }.map { it.key }
+            .onEach { line ->
                 //clear line
-                lines++
-                res = res.filter { it.location.y != entry.key }
-                    .map { if (it.location.y < entry.key) it.offsetBy(0 to 1) else it }
+                clearing = clearing.filter { it.location.y != line }
+                //clear line and then offset brick
+                cleared = cleared.filter { it.location.y != line }
+                    .map { if (it.location.y < line) it.offsetBy(0 to 1) else it }
 
             }
-        }
 
-        return res to lines
+        return Triple(bricks, clearing, cleared) to clearLines.size
     }
 
     data class ViewState(
@@ -116,26 +153,28 @@ class GameViewModel : ViewModel() {
         val matrix: Pair<Int, Int> = MatrixWidth to MatrixHeight,
         val gameStatus: GameStatus = GameStatus.Onboard,
         val score: Int = 0,
-        val line: Int = 0
+        val line: Int = 0,
     ) {
         val spiritNext: Spirit
             get() = spiritReserve.firstOrNull() ?: Empty
     }
 
-    sealed class Intent {
-        data class Move(val direction: Direction) : Intent()
-        object Restart : Intent()
-        object Pause : Intent()
-        object Resume : Intent()
-        object Rotate : Intent()
-        object Drop : Intent()
-        object GameTick : Intent()
-    }
+}
+
+sealed class Action {
+    data class Move(val direction: Direction) : Action()
+    object Restart : Action()
+    object Pause : Action()
+    object Resume : Action()
+    object Rotate : Action()
+    object Drop : Action()
+    object GameTick : Action()
 }
 
 enum class GameStatus {
-    Onboard, Running, Paused, GameOver
+    Onboard, Running, LineClearing, Paused, GameOver
 }
+
 
 private const val MatrixWidth = 12
 private const val MatrixHeight = 24

@@ -21,6 +21,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.jetgame.tetris.logic.Action
 import com.jetgame.tetris.logic.Direction
 import com.jetgame.tetris.logic.GameStatus
 import com.jetgame.tetris.logic.GameViewModel
@@ -45,7 +46,7 @@ class MainActivity : ComponentActivity() {
                     val tickerChannel = remember { ticker(delayMillis = 200) }
                     LaunchedEffect(key1 = Unit) {
                         for (event in tickerChannel) {
-                            viewModel.dispatch(GameViewModel.Intent.GameTick)
+                            viewModel.dispatch(Action.GameTick)
                         }
                     }
 
@@ -54,12 +55,12 @@ class MainActivity : ComponentActivity() {
                         val observer = object : LifecycleObserver {
                             @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
                             fun onResume() {
-                                viewModel.dispatch(GameViewModel.Intent.Resume)
+                                viewModel.dispatch(Action.Resume)
                             }
 
                             @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
                             fun onPause() {
-                                viewModel.dispatch(GameViewModel.Intent.Pause)
+                                viewModel.dispatch(Action.Pause)
                             }
                         }
                         lifecycleOwner.lifecycle.addObserver(observer)
@@ -72,20 +73,20 @@ class MainActivity : ComponentActivity() {
 
                     GameBody(combinedClickable(
                         onMove = { direction: Direction ->
-                            if (direction == Direction.UP) viewModel.dispatch(GameViewModel.Intent.Drop)
-                            else viewModel.dispatch(GameViewModel.Intent.Move(direction))
+                            if (direction == Direction.Up) viewModel.dispatch(Action.Drop)
+                            else viewModel.dispatch(Action.Move(direction))
                         },
                         onRotate = {
-                            viewModel.dispatch(GameViewModel.Intent.Rotate)
+                            viewModel.dispatch(Action.Rotate)
                         },
                         onRestart = {
-                            viewModel.dispatch(GameViewModel.Intent.Restart)
+                            viewModel.dispatch(Action.Restart)
                         },
                         onPause = {
                             if (viewModel.viewState.value.gameStatus == GameStatus.Running) {
-                                viewModel.dispatch(GameViewModel.Intent.Pause)
+                                viewModel.dispatch(Action.Pause)
                             } else {
-                                viewModel.dispatch(GameViewModel.Intent.Resume)
+                                viewModel.dispatch(Action.Resume)
                             }
 
                         }

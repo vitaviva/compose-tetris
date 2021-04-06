@@ -10,14 +10,14 @@ import com.jetgame.tetris.R
 fun Offset(x: Int, y: Int) = androidx.compose.ui.geometry.Offset(x.toFloat(), y.toFloat())
 
 enum class Direction {
-    LEFT, UP, RIGHT, DOWN
+    Left, Up, Right, Down
 }
 
 fun Direction.toOffset() = when (this) {
-    Direction.LEFT -> -1 to 0
-    Direction.UP -> 0 to -1
-    Direction.RIGHT -> 1 to 0
-    Direction.DOWN -> 0 to 1
+    Direction.Left -> -1 to 0
+    Direction.Up -> 0 to -1
+    Direction.Right -> 1 to 0
+    Direction.Down -> 0 to 1
 }
 
 
@@ -30,7 +30,7 @@ val LedFontFamily = FontFamily(
 )
 
 val NextMatrix = 4 to 2
-val ScoreEverySpirit = 12
+const val ScoreEverySpirit = 12
 
 fun calculateScore(lines: Int) = when (lines) {
     1 -> 100
