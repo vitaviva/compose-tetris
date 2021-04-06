@@ -103,7 +103,12 @@ fun GameButton(
                                     onClick()
                                 }
                             }
-                            else -> return@pointerInteropFilter false
+                            else -> {
+                                if (it.action != ACTION_MOVE) {
+                                    ticker.cancel()
+                                }
+                                return@pointerInteropFilter false
+                            }
                         }
                         true
                     }
