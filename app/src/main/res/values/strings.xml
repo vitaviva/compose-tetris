@@ -1,3 +1,14 @@
 <resources>
     <string name="app_name">Tetris</string>
+    <string name="body_label">TETRIS</string>
+    <string name="game_over_hint">GAME OVER</string>
+    <string name="button_rotate">ROTATE</string>
+    <string name="button_up">▲</string>
+    <string name="button_left">◀</string>
+    <string name="button_right">▶</string>
+    <string name="button_down">▼</string>
+    <string name="button_sounds">SOUNDS</string>
+    <string name="button_pause">PAUSE/RESUME</string>
+    <string name="button_reset">START/RESET</string>
+
 </resources>

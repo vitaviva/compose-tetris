@@ -20,6 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -55,28 +56,31 @@ fun LedClock(modifier: Modifier = Modifier) {
     Row(modifier) {
         LedNumber(num = clock.first, digits = 2, fillZero = true)
 
-        Box(
-            modifier = Modifier
-                .width(6.dp)
-                .padding(end = 1.dp),
-        ) {
-            repeat(2) {
+        val LedComma: @Composable (color: Color) -> Unit = remember {
+            {
                 Text(
                     ":",
                     fontFamily = LedFontFamily,
                     textAlign = TextAlign.End,
-                    color = run {
-                        if (it == 0) BrickMatrix
-                        else BrickSpirit.copy(
-                            alpha = animateValue.roundToInt().toFloat()
-                        )
-                    },
+                    color = it,
                     fontSize = 16.sp,
                     modifier = Modifier.fillMaxWidth()
                 )
             }
         }
 
+        Box(
+            modifier = Modifier
+                .width(6.dp)
+                .padding(end = 1.dp),
+        ) {
+
+            LedComma(BrickMatrix)
+            if (animateValue.roundToInt() == 1) {
+                LedComma(BrickSpirit)
+            }
+
+        }
 
         LedNumber(num = clock.second, digits = 2, fillZero = true)
     }

@@ -1,5 +1,6 @@
 package com.jetgame.tetris.logic
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jetgame.tetris.logic.Spirit.Companion.Empty
@@ -24,10 +25,30 @@ class GameViewModel : ViewModel() {
     private fun reduce(state: ViewState, action: Action) {
         viewModelScope.launch {
             withContext(Dispatchers.Default) {
-                _viewState.value = when (action) {
-                    Action.Restart -> ViewState(gameStatus = GameStatus.Running)
-                    Action.Pause -> state.copy(gameStatus = GameStatus.Paused)
-                    Action.Resume -> state.copy(gameStatus = GameStatus.Running)
+
+                emit(when (action) {
+                    Action.Reset -> run {
+                        if (state.gameStatus == GameStatus.Onboard || state.gameStatus == GameStatus.GameOver)
+                            return@run ViewState(gameStatus = GameStatus.Running)
+                        state.copy(
+                            gameStatus = GameStatus.ScreenClearing
+                        ).also {
+                            launch {
+                                clearScreen(state = state)
+                                emit(ViewState(gameStatus = GameStatus.Onboard))
+                            }
+                        }
+                    }
+
+                    Action.Pause -> if (state.gameStatus == GameStatus.Running) {
+                        state.copy(gameStatus = GameStatus.Paused)
+                    } else state
+
+                    Action.Resume ->
+                        if (state.gameStatus == GameStatus.Paused) {
+                            state.copy(gameStatus = GameStatus.Running)
+                        } else state
+
                     is Action.Move -> run {
                         if (state.gameStatus != GameStatus.Running) return@run state
                         val offset = action.direction.toOffset()
@@ -38,6 +59,7 @@ class GameViewModel : ViewModel() {
                             state
                         }
                     }
+
                     Action.Rotate -> run {
                         if (state.gameStatus != GameStatus.Running) return@run state
                         val spirit = state.spirit.rotate().adjustOffset(state.matrix)
@@ -47,6 +69,7 @@ class GameViewModel : ViewModel() {
                             state
                         }
                     }
+
                     Action.Drop -> run {
                         if (state.gameStatus != GameStatus.Running) return@run state
                         var i = 0
@@ -58,14 +81,32 @@ class GameViewModel : ViewModel() {
 
                         state.copy(spirit = spirit)
                     }
+
                     Action.GameTick -> run {
                         if (state.gameStatus != GameStatus.Running) return@run state
+
+                        //Spirit continue falling
                         if (state.spirit != Empty) {
                             val spirit = state.spirit.moveBy(Direction.Down.toOffset())
                             if (spirit.isValidInMatrix(state.bricks, state.matrix)) {
                                 return@run state.copy(spirit = spirit)
                             }
                         }
+
+                        //GameOver
+                        if (!state.spirit.isValidInMatrix(state.bricks, state.matrix)) {
+                            return@run state.copy(
+                                gameStatus = GameStatus.ScreenClearing
+                            ).also {
+                                launch {
+                                    emit(
+                                        clearScreen(state = state).copy(gameStatus = GameStatus.GameOver)
+                                    )
+                                }
+                            }
+                        }
+
+                        //Next Spirit
                         val (updatedBricks, clearedLines) = updateBricks(
                             state.bricks,
                             state.spirit,
@@ -87,18 +128,21 @@ class GameViewModel : ViewModel() {
                                 launch {
                                     //animate the clearing lines
                                     repeat(5) {
-                                        _viewState.value =
+                                        emit(
                                             state.copy(
                                                 gameStatus = GameStatus.LineClearing,
                                                 spirit = Empty,
                                                 bricks = if (it % 2 == 0) noClear else clearing
                                             )
+                                        )
                                         delay(100)
                                     }
                                     //delay emit new state
-                                    _viewState.value = newState.copy(
-                                        bricks = cleared,
-                                        gameStatus = GameStatus.Running
+                                    emit(
+                                        newState.copy(
+                                            bricks = cleared,
+                                            gameStatus = GameStatus.Running
+                                        )
                                     )
                                 }
                             }
@@ -106,10 +150,42 @@ class GameViewModel : ViewModel() {
                             newState.copy(bricks = noClear)
                         }
                     }
-                }
+                })
             }
         }
 
+    }
+
+    private suspend fun clearScreen(state: ViewState): ViewState {
+        val xRange = 0 until state.matrix.first
+        var newState = state
+
+        (state.matrix.second downTo 0).forEach { y ->
+            emit(
+                state.copy(
+                    gameStatus = GameStatus.ScreenClearing,
+                    bricks = state.bricks + Brick.of(
+                        xRange, y until state.matrix.second
+                    )
+                )
+            )
+            delay(50)
+        }
+        (0..state.matrix.second).forEach { y ->
+            emit(
+                state.copy(
+                    gameStatus = GameStatus.ScreenClearing,
+                    bricks = Brick.of(xRange, y until state.matrix.second),
+                    spirit = Empty
+                ).also { newState = it }
+            )
+            delay(50)
+        }
+        return newState
+    }
+
+    private fun emit(state: ViewState) {
+        _viewState.value = state
     }
 
     /**
@@ -153,7 +229,7 @@ class GameViewModel : ViewModel() {
         val matrix: Pair<Int, Int> = MatrixWidth to MatrixHeight,
         val gameStatus: GameStatus = GameStatus.Onboard,
         val score: Int = 0,
-        val line: Int = 0,
+        val line: Int = 0
     ) {
         val spiritNext: Spirit
             get() = spiritReserve.firstOrNull() ?: Empty
@@ -163,7 +239,7 @@ class GameViewModel : ViewModel() {
 
 sealed class Action {
     data class Move(val direction: Direction) : Action()
-    object Restart : Action()
+    object Reset : Action()
     object Pause : Action()
     object Resume : Action()
     object Rotate : Action()
@@ -172,7 +248,12 @@ sealed class Action {
 }
 
 enum class GameStatus {
-    Onboard, Running, LineClearing, Paused, GameOver
+    Onboard, //游戏欢迎页
+    Running, //游戏进行中
+    LineClearing,// 消行动画中
+    Paused,//游戏暂停
+    ScreenClearing, //清屏动画中
+    GameOver//游戏结束
 }
 
 

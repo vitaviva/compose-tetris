@@ -1,5 +1,6 @@
 package com.jetgame.tetris.ui
 
+import android.graphics.Paint
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -26,6 +27,9 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -34,6 +38,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.jetgame.tetris.R
 import com.jetgame.tetris.logic.Brick
+import com.jetgame.tetris.logic.GameStatus
 import com.jetgame.tetris.logic.GameViewModel
 import com.jetgame.tetris.logic.NextMatrix
 import com.jetgame.tetris.logic.Spirit
@@ -70,10 +75,12 @@ fun GameScreen(modifier: Modifier = Modifier) {
                 size.height / viewState.matrix.second
             )
 
+
             drawMatrix(brickSize, viewState.matrix)
             drawMatrixBorder(brickSize, viewState.matrix)
             drawBricks(viewState.bricks, brickSize, viewState.matrix)
             drawSpirit(viewState.spirit, brickSize, viewState.matrix)
+            drawText(viewState.gameStatus, brickSize, viewState.matrix)
 
         }
 
@@ -89,6 +96,7 @@ fun GameScreen(modifier: Modifier = Modifier) {
     }
 
 }
+
 
 @Composable
 fun GameScoreboard(
@@ -160,6 +168,40 @@ fun GameScoreboard(
     }
 }
 
+
+private fun DrawScope.drawText(
+    gameStatus: GameStatus,
+    brickSize: Float,
+    matrix: Pair<Int, Int>
+) {
+
+    val center = Offset(
+        brickSize * matrix.first / 2,
+        brickSize * matrix.second / 2
+    )
+
+    val paint = Paint().apply {
+        color = BrickSpirit.toArgb()
+        textSize = 50f
+        textAlign = Paint.Align.CENTER
+    }
+
+    val drawText = { text: String ->
+        drawIntoCanvas {
+            it.nativeCanvas.drawText(
+                text,
+                center.x,
+                center.y,
+                paint
+            )
+        }
+    }
+    if (gameStatus == GameStatus.Onboard) {
+        drawText("TETRIS")
+    } else if (gameStatus == GameStatus.GameOver) {
+        drawText("GAME OVER")
+    }
+}
 
 private fun DrawScope.drawMatrix(brickSize: Float, matrix: Pair<Int, Int>) {
     (0 until matrix.first).forEach { x ->

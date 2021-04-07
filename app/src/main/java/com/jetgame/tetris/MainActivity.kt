@@ -80,7 +80,7 @@ class MainActivity : ComponentActivity() {
                             viewModel.dispatch(Action.Rotate)
                         },
                         onRestart = {
-                            viewModel.dispatch(Action.Restart)
+                            viewModel.dispatch(Action.Reset)
                         },
                         onPause = {
                             if (viewModel.viewState.value.gameStatus == GameStatus.Running) {

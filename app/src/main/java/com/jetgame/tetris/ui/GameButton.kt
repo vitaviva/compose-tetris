@@ -83,7 +83,7 @@ fun GameButton(
                                 }
 
 
-                                ticker = ticker(initialDelayMillis = 200, delayMillis = 100)
+                                ticker = ticker(initialDelayMillis = 300, delayMillis = 60)
                                 coroutineScope.launch {
                                     ticker
                                         .receiveAsFlow()

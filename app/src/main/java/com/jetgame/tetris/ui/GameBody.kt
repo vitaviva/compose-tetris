@@ -17,17 +17,18 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.jetgame.tetris.R
 import com.jetgame.tetris.logic.Direction
 import com.jetgame.tetris.ui.theme.BodyColor
 import com.jetgame.tetris.ui.theme.ScreenBackground
@@ -68,7 +69,7 @@ fun GameBody(
                     .background(BodyColor)
             ) {
                 Text(
-                    "TETRIS",
+                    stringResource(id = R.string.body_label),
                     modifier = Modifier.align(Alignment.Center),
                     textAlign = TextAlign.Center,
                     fontFamily = FontFamily.Cursive,
@@ -122,9 +123,9 @@ fun GameBody(
                 .padding(start = 40.dp, end = 40.dp)
         ) {
             Row {
-                SettingText("SOUNDS", Modifier.weight(1f))
-                SettingText("PAUSE/RESUME", Modifier.weight(1f))
-                SettingText("START/RESET", Modifier.weight(1f))
+                SettingText(stringResource(id = R.string.button_sounds), Modifier.weight(1f))
+                SettingText(stringResource(id = R.string.button_pause), Modifier.weight(1f))
+                SettingText(stringResource(id = R.string.button_reset), Modifier.weight(1f))
             }
             Spacer(modifier = Modifier.height(5.dp))
             Row {
@@ -190,7 +191,7 @@ fun GameBody(
                     autoInvokeWhenPressed = false,
                     size = DirectionButtonSize
                 ) {
-                    ButtonText(it, "▲")
+                    ButtonText(it, stringResource(id = R.string.button_up))
                 }
                 GameButton(
                     Modifier.align(Alignment.CenterStart),
@@ -198,7 +199,7 @@ fun GameBody(
                     autoInvokeWhenPressed = true,
                     size = DirectionButtonSize
                 ) {
-                    ButtonText(it, "◀")
+                    ButtonText(it, stringResource(id = R.string.button_left))
                 }
                 GameButton(
                     Modifier.align(Alignment.CenterEnd),
@@ -206,7 +207,7 @@ fun GameBody(
                     autoInvokeWhenPressed = true,
                     size = DirectionButtonSize
                 ) {
-                    ButtonText(it, "▶")
+                    ButtonText(it, stringResource(id = R.string.button_right))
                 }
                 GameButton(
                     Modifier.align(Alignment.BottomCenter),
@@ -214,7 +215,7 @@ fun GameBody(
                     autoInvokeWhenPressed = true,
                     size = DirectionButtonSize
                 ) {
-                    ButtonText(it, "▼")
+                    ButtonText(it, stringResource(id = R.string.button_down))
                 }
 
             }
@@ -229,10 +230,10 @@ fun GameBody(
                 GameButton(
                     Modifier.align(Alignment.CenterEnd),
                     onClick = { clickable.onRotate() },
-                    autoInvokeWhenPressed = true,
+                    autoInvokeWhenPressed = false,
                     size = RotateButtonSize
                 ) {
-                    ButtonText(it, "ROTATE")
+                    ButtonText(it, stringResource(id = R.string.button_rotate))
                 }
             }
         }
