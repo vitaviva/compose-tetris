@@ -1,6 +1,5 @@
 package com.jetgame.tetris.logic
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jetgame.tetris.logic.Spirit.Companion.Empty
@@ -59,6 +58,7 @@ class GameViewModel : ViewModel() {
 
                     is Action.Move -> run {
                         if (!state.isRuning) return@run state
+                        SoundUtil.play(state.isMute, SoundType.Move)
                         val offset = action.direction.toOffset()
                         val spirit = state.spirit.moveBy(offset)
                         if (spirit.isValidInMatrix(state.bricks, state.matrix)) {
@@ -70,6 +70,7 @@ class GameViewModel : ViewModel() {
 
                     Action.Rotate -> run {
                         if (!state.isRuning) return@run state
+                        SoundUtil.play(state.isMute, SoundType.Rotate)
                         val spirit = state.spirit.rotate().adjustOffset(state.matrix)
                         if (spirit.isValidInMatrix(state.bricks, state.matrix)) {
                             state.copy(spirit = spirit)
@@ -80,6 +81,7 @@ class GameViewModel : ViewModel() {
 
                     Action.Drop -> run {
                         if (!state.isRuning) return@run state
+                        SoundUtil.play(state.isMute, SoundType.Drop)
                         var i = 0
                         while (state.spirit.moveBy(0 to ++i)
                                 .isValidInMatrix(state.bricks, state.matrix)
@@ -130,6 +132,7 @@ class GameViewModel : ViewModel() {
                             line = state.line + clearedLines
                         )
                         if (clearedLines != 0) {// has cleared lines
+                            SoundUtil.play(state.isMute, SoundType.Clean)
                             state.copy(
                                 gameStatus = GameStatus.LineClearing
                             ).also {
@@ -168,6 +171,7 @@ class GameViewModel : ViewModel() {
     }
 
     private suspend fun clearScreen(state: ViewState): ViewState {
+        SoundUtil.play(state.isMute, SoundType.Start)
         val xRange = 0 until state.matrix.first
         var newState = state
 

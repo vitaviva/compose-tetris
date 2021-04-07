@@ -20,11 +20,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.jetgame.tetris.logic.Action
 import com.jetgame.tetris.logic.Direction
 import com.jetgame.tetris.logic.GameStatus
 import com.jetgame.tetris.logic.GameViewModel
+import com.jetgame.tetris.logic.SoundUtil
 import com.jetgame.tetris.ui.GameBody
 import com.jetgame.tetris.ui.GameScreen
 import com.jetgame.tetris.ui.PreviewGamescreen
@@ -36,6 +39,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         transparentStatusBar(window)
+        SoundUtil.init(this)
+
         setContent {
             ComposetetrisTheme {
                 // A surface container using the 'background' color from the theme
@@ -112,6 +117,10 @@ class MainActivity : ComponentActivity() {
         window.statusBarColor = Color.TRANSPARENT
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        SoundUtil.release()
+    }
 }
 
 
