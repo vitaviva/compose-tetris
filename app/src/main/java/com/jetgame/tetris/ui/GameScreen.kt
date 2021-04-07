@@ -1,6 +1,12 @@
 package com.jetgame.tetris.ui
 
 import android.graphics.Paint
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -64,6 +70,14 @@ fun GameScreen(modifier: Modifier = Modifier) {
             .padding(10.dp)
     ) {
 
+        val animateValue by rememberInfiniteTransition().animateFloat(
+            initialValue = 0f, targetValue = 0.7f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(durationMillis = 1500),
+                repeatMode = RepeatMode.Reverse,
+            ),
+        )
+
         Canvas(
             modifier = Modifier
                 .fillMaxSize()
@@ -75,12 +89,11 @@ fun GameScreen(modifier: Modifier = Modifier) {
                 size.height / viewState.matrix.second
             )
 
-
             drawMatrix(brickSize, viewState.matrix)
             drawMatrixBorder(brickSize, viewState.matrix)
             drawBricks(viewState.bricks, brickSize, viewState.matrix)
             drawSpirit(viewState.spirit, brickSize, viewState.matrix)
-            drawText(viewState.gameStatus, brickSize, viewState.matrix)
+            drawText(viewState.gameStatus, brickSize, viewState.matrix, animateValue)
 
         }
 
@@ -90,7 +103,9 @@ fun GameScreen(modifier: Modifier = Modifier) {
                 else viewState.spiritNext.rotate()
             },
             score = viewState.score,
-            line = viewState.line
+            line = viewState.line,
+            isMute = viewState.isMute,
+            isPaused = viewState.isPaused
         )
 
     }
@@ -104,7 +119,9 @@ fun GameScoreboard(
     brickSize: Float = 35f,
     spirit: Spirit,
     score: Int = 0,
-    line: Int = 0
+    line: Int = 0,
+    isMute: Boolean = false,
+    isPaused: Boolean = false
 ) {
     Row(modifier.fillMaxSize()) {
         Spacer(modifier = Modifier.weight(0.65f))
@@ -125,7 +142,7 @@ fun GameScoreboard(
 
             Spacer(modifier = Modifier.height(margin))
 
-            Text("Level", fontSize = textSize)
+            Text("Level", fontSize = textSize)//TODO
             LedNumber(Modifier.fillMaxWidth(), 1, 1)
 
             Spacer(modifier = Modifier.height(margin))
@@ -149,13 +166,13 @@ fun GameScoreboard(
                 Image(
                     modifier = Modifier.width(15.dp),
                     imageVector = ImageVector.vectorResource(id = R.drawable.ic_baseline_music_off_24),
-                    colorFilter = ColorFilter.tint(BrickSpirit),
+                    colorFilter = ColorFilter.tint(if (isMute) BrickSpirit else BrickMatrix),
                     contentDescription = null
                 )
                 Image(
                     modifier = Modifier.width(16.dp),
                     imageVector = ImageVector.vectorResource(id = R.drawable.ic_baseline_pause_24),
-                    colorFilter = ColorFilter.tint(BrickSpirit),
+                    colorFilter = ColorFilter.tint(if (isPaused) BrickSpirit else BrickMatrix),
                     contentDescription = null
                 )
 
@@ -172,34 +189,36 @@ fun GameScoreboard(
 private fun DrawScope.drawText(
     gameStatus: GameStatus,
     brickSize: Float,
-    matrix: Pair<Int, Int>
+    matrix: Pair<Int, Int>,
+    alpha: Float,
 ) {
 
     val center = Offset(
         brickSize * matrix.first / 2,
         brickSize * matrix.second / 2
     )
+    val drawText = { text: String, size: Float ->
 
-    val paint = Paint().apply {
-        color = BrickSpirit.toArgb()
-        textSize = 50f
-        textAlign = Paint.Align.CENTER
-    }
-
-    val drawText = { text: String ->
         drawIntoCanvas {
             it.nativeCanvas.drawText(
                 text,
                 center.x,
                 center.y,
-                paint
+                Paint().apply {
+                    color = Color.Black.copy(alpha = alpha).toArgb()
+                    textSize = size
+                    textAlign = Paint.Align.CENTER
+                    style = Paint.Style.FILL_AND_STROKE
+                    strokeWidth = size / 12
+                }
             )
+
         }
     }
     if (gameStatus == GameStatus.Onboard) {
-        drawText("TETRIS")
+        drawText("TETRIS", 80f)
     } else if (gameStatus == GameStatus.GameOver) {
-        drawText("GAME OVER")
+        drawText("GAME OVER", 60f)
     }
 }
 

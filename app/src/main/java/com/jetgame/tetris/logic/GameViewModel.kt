@@ -29,28 +29,36 @@ class GameViewModel : ViewModel() {
                 emit(when (action) {
                     Action.Reset -> run {
                         if (state.gameStatus == GameStatus.Onboard || state.gameStatus == GameStatus.GameOver)
-                            return@run ViewState(gameStatus = GameStatus.Running)
+                            return@run ViewState(
+                                gameStatus = GameStatus.Running,
+                                isMute = state.isMute
+                            )
                         state.copy(
                             gameStatus = GameStatus.ScreenClearing
                         ).also {
                             launch {
                                 clearScreen(state = state)
-                                emit(ViewState(gameStatus = GameStatus.Onboard))
+                                emit(
+                                    ViewState(
+                                        gameStatus = GameStatus.Onboard,
+                                        isMute = state.isMute
+                                    )
+                                )
                             }
                         }
                     }
 
-                    Action.Pause -> if (state.gameStatus == GameStatus.Running) {
+                    Action.Pause -> if (state.isRuning) {
                         state.copy(gameStatus = GameStatus.Paused)
                     } else state
 
                     Action.Resume ->
-                        if (state.gameStatus == GameStatus.Paused) {
+                        if (state.isPaused) {
                             state.copy(gameStatus = GameStatus.Running)
                         } else state
 
                     is Action.Move -> run {
-                        if (state.gameStatus != GameStatus.Running) return@run state
+                        if (!state.isRuning) return@run state
                         val offset = action.direction.toOffset()
                         val spirit = state.spirit.moveBy(offset)
                         if (spirit.isValidInMatrix(state.bricks, state.matrix)) {
@@ -61,7 +69,7 @@ class GameViewModel : ViewModel() {
                     }
 
                     Action.Rotate -> run {
-                        if (state.gameStatus != GameStatus.Running) return@run state
+                        if (!state.isRuning) return@run state
                         val spirit = state.spirit.rotate().adjustOffset(state.matrix)
                         if (spirit.isValidInMatrix(state.bricks, state.matrix)) {
                             state.copy(spirit = spirit)
@@ -71,7 +79,7 @@ class GameViewModel : ViewModel() {
                     }
 
                     Action.Drop -> run {
-                        if (state.gameStatus != GameStatus.Running) return@run state
+                        if (!state.isRuning) return@run state
                         var i = 0
                         while (state.spirit.moveBy(0 to ++i)
                                 .isValidInMatrix(state.bricks, state.matrix)
@@ -83,7 +91,7 @@ class GameViewModel : ViewModel() {
                     }
 
                     Action.GameTick -> run {
-                        if (state.gameStatus != GameStatus.Running) return@run state
+                        if (!state.isRuning) return@run state
 
                         //Spirit continue falling
                         if (state.spirit != Empty) {
@@ -150,6 +158,9 @@ class GameViewModel : ViewModel() {
                             newState.copy(bricks = noClear)
                         }
                     }
+
+                    Action.Mute -> state.copy(isMute = !state.isMute)
+
                 })
             }
         }
@@ -229,10 +240,17 @@ class GameViewModel : ViewModel() {
         val matrix: Pair<Int, Int> = MatrixWidth to MatrixHeight,
         val gameStatus: GameStatus = GameStatus.Onboard,
         val score: Int = 0,
-        val line: Int = 0
+        val line: Int = 0,
+        val isMute: Boolean = false,
     ) {
         val spiritNext: Spirit
             get() = spiritReserve.firstOrNull() ?: Empty
+
+        val isPaused
+            get() = gameStatus == GameStatus.Paused
+
+        val isRuning
+            get() = gameStatus == GameStatus.Running
     }
 
 }
@@ -245,6 +263,7 @@ sealed class Action {
     object Rotate : Action()
     object Drop : Action()
     object GameTick : Action()
+    object Mute : Action()
 }
 
 enum class GameStatus {

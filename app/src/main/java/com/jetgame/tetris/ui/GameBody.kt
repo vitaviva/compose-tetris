@@ -135,7 +135,7 @@ fun GameBody(
                     modifier = Modifier
                         .weight(1f)
                         .padding(start = 20.dp, end = 20.dp),
-                    onClick = { },
+                    onClick = { clickable.onMute() },
                     size = SettingButtonSize
                 ) {}
 
@@ -288,7 +288,8 @@ data class Clickable constructor(
     val onMove: (Direction) -> Unit,
     val onRotate: () -> Unit,
     val onRestart: () -> Unit,
-    val onPause: () -> Unit
+    val onPause: () -> Unit,
+    val onMute: () -> Unit
 )
 
 fun combinedClickable(
@@ -296,7 +297,8 @@ fun combinedClickable(
     onRotate: () -> Unit = {},
     onRestart: () -> Unit = {},
     onPause: () -> Unit = {},
-) = Clickable(onMove, onRotate, onRestart, onPause)
+    onMute: () -> Unit = {}
+) = Clickable(onMove, onRotate, onRestart, onPause, onMute)
 
 
 @Preview(widthDp = 400, heightDp = 700)

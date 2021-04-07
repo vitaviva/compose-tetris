@@ -53,7 +53,6 @@ fun GameButton(
         modifier = modifier
             .shadow(5.dp, shape = backgroundShape)
             .size(size = size)
-//            .padding(20.dp)
             .clip(backgroundShape)
             .background(
                 brush = Brush.verticalGradient(

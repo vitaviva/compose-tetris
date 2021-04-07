@@ -83,12 +83,14 @@ class MainActivity : ComponentActivity() {
                             viewModel.dispatch(Action.Reset)
                         },
                         onPause = {
-                            if (viewModel.viewState.value.gameStatus == GameStatus.Running) {
+                            if (viewModel.viewState.value.isRuning) {
                                 viewModel.dispatch(Action.Pause)
                             } else {
                                 viewModel.dispatch(Action.Resume)
                             }
-
+                        },
+                        onMute = {
+                            viewModel.dispatch(Action.Mute)
                         }
                     )) {
                         GameScreen(
