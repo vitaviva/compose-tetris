@@ -31,7 +31,6 @@ import androidx.compose.ui.unit.sp
 import com.jetgame.tetris.R
 import com.jetgame.tetris.logic.Direction
 import com.jetgame.tetris.ui.theme.BodyColor
-import com.jetgame.tetris.ui.theme.BrickSpirit
 import com.jetgame.tetris.ui.theme.ScreenBackground
 
 @Composable
@@ -43,48 +42,48 @@ fun GameBody(
     Column(
         Modifier
             .fillMaxSize()
-            .background(Color.Transparent)
-            .background(BodyColor, RoundedCornerShape(50.dp))
-            .padding(top = 30.dp)
+            .background(Color.Black)
+            .background(BodyColor, RoundedCornerShape(10.dp))
+            .padding(top = 20.dp)
     ) {
 
         //Screen
         Box(Modifier.align(Alignment.CenterHorizontally)) {
 
 
-//            Box(
-//                modifier = Modifier
-//                    .align(Alignment.Center)
-//                    .size(330.dp, 200.dp)
-//                    .padding(top = 20.dp)
-//                    .background(Color.Black.copy(alpha = 0.8f))
-//                    .padding(5.dp)
-//                    .background(BodyColor)
-//            )
-//
-//            Box(
-//                Modifier
-//                    .width(120.dp)
-//                    .height(45.dp)
-//                    .align(Alignment.TopCenter)
-//                    .background(BodyColor)
-//            ) {
-//                Text(
-//                    stringResource(id = R.string.body_label),
-//                    modifier = Modifier.align(Alignment.Center),
-//                    textAlign = TextAlign.Center,
-//                    fontFamily = FontFamily.Cursive,
-//                    fontWeight = FontWeight.Bold,
-//                    fontSize = 20.sp
-//                )
-//
-//            }
+            Box(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .size(330.dp, 400.dp)
+                    .padding(top = 20.dp)
+                    .background(Color.Black.copy(alpha = 0.8f))
+                    .padding(5.dp)
+                    .background(BodyColor)
+            )
+
+            Box(
+                Modifier
+                    .width(120.dp)
+                    .height(45.dp)
+                    .align(Alignment.TopCenter)
+                    .background(BodyColor)
+            ) {
+                Text(
+                    stringResource(id = R.string.body_label),
+                    modifier = Modifier.align(Alignment.Center),
+                    textAlign = TextAlign.Center,
+                    fontFamily = FontFamily.Cursive,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp
+                )
+
+            }
 
             Box(
                 Modifier
                     .align(Alignment.Center)
-                    .size(360.dp, 220.dp)
-                    .padding(start = 20.dp, end = 20.dp, top = 20.dp, bottom = 20.dp)
+                    .size(360.dp, 380.dp)
+                    .padding(start = 50.dp, end = 50.dp, top = 50.dp, bottom = 30.dp)
             ) {
                 Canvas(modifier = Modifier.fillMaxSize()) {
                     drawScreenBorder(
@@ -98,23 +97,15 @@ fun GameBody(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(12.dp)
+                        .padding(6.dp)
                         .background(ScreenBackground)
                 ) {
                     screen()
                 }
-
-                Text(
-                    "TETRIS",
-                    textAlign = TextAlign.Center,
-                    color = BrickSpirit,
-                    fontSize = 75.sp,
-                    modifier = Modifier.align(Alignment.Center),
-                    fontWeight = FontWeight.Bold
-                )
             }
         }
 
+        Spacer(modifier = Modifier.height(20.dp))
 
         val SettingText = @Composable { text: String, modifier: Modifier ->
             Text(
@@ -126,51 +117,51 @@ fun GameBody(
         }
 
 
-//        //Setting Button
-//        Column(
-//            modifier = Modifier
-//                .padding(start = 40.dp, end = 40.dp)
-//        ) {
-//            Row {
-//                SettingText(stringResource(id = R.string.button_sounds), Modifier.weight(1f))
-//                SettingText(stringResource(id = R.string.button_pause), Modifier.weight(1f))
-//                SettingText(stringResource(id = R.string.button_reset), Modifier.weight(1f))
-//            }
-//            Spacer(modifier = Modifier.height(5.dp))
-//            Row {
-//
-//                //SOUNDS
-//                GameButton(
-//                    modifier = Modifier
-//                        .weight(1f)
-//                        .padding(start = 20.dp, end = 20.dp),
-//                    onClick = { clickable.onMute() },
-//                    size = SettingButtonSize
-//                ) {}
-//
-//                //PAUSE
-//                GameButton(
-//                    modifier = Modifier
-//                        .weight(1f)
-//                        .padding(start = 20.dp, end = 20.dp),
-//                    onClick = { clickable.onPause() },
-//                    size = SettingButtonSize
-//                ) {}
-//
-//                //RESET
-//                GameButton(
-//                    modifier = Modifier
-//                        .weight(1f)
-//                        .padding(start = 20.dp, end = 20.dp),
-//                    onClick = { clickable.onRestart() },
-//                    size = SettingButtonSize
-//                ) {}
-//
-//            }
-//        }
+        //Setting Button
+        Column(
+            modifier = Modifier
+                .padding(start = 40.dp, end = 40.dp)
+        ) {
+            Row {
+                SettingText(stringResource(id = R.string.button_sounds), Modifier.weight(1f))
+                SettingText(stringResource(id = R.string.button_pause), Modifier.weight(1f))
+                SettingText(stringResource(id = R.string.button_reset), Modifier.weight(1f))
+            }
+            Spacer(modifier = Modifier.height(5.dp))
+            Row {
+
+                //SOUNDS
+                GameButton(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 20.dp, end = 20.dp),
+                    onClick = { clickable.onMute() },
+                    size = SettingButtonSize
+                ) {}
+
+                //PAUSE
+                GameButton(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 20.dp, end = 20.dp),
+                    onClick = { clickable.onPause() },
+                    size = SettingButtonSize
+                ) {}
+
+                //RESET
+                GameButton(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 20.dp, end = 20.dp),
+                    onClick = { clickable.onRestart() },
+                    size = SettingButtonSize
+                ) {}
+
+            }
+        }
 
 
-//        Spacer(modifier = Modifier.height(30.dp))
+        Spacer(modifier = Modifier.height(30.dp))
 
 
         //Game Button
@@ -185,15 +176,14 @@ fun GameBody(
 
         Row(
             modifier = Modifier
-                .padding(start = 45.dp, end = 45.dp)
+                .padding(start = 40.dp, end = 40.dp)
                 .height(160.dp)
-                .padding(bottom = 10.dp)
         ) {
             //DIRECTION BTN
             Box(
                 modifier = Modifier
                     .fillMaxHeight()
-                    .weight(0.55f)
+                    .weight(1f)
             ) {
                 GameButton(
                     Modifier.align(Alignment.TopCenter),
@@ -234,7 +224,7 @@ fun GameBody(
             //ROTATE BTN
             Box(
                 modifier = Modifier
-                    .weight(0.45f)
+                    .weight(1f)
                     .fillMaxHeight()
             ) {
                 GameButton(
@@ -311,7 +301,7 @@ fun combinedClickable(
 ) = Clickable(onMove, onRotate, onRestart, onPause, onMute)
 
 
-@Preview(widthDp = 400, heightDp = 400)
+@Preview(widthDp = 400, heightDp = 700)
 @Composable
 fun PreviewGameBody() {
     GameBody {}
