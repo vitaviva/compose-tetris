@@ -1,5 +1,6 @@
 package com.jetgame.tetris.ui
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -27,6 +28,9 @@ import androidx.compose.ui.unit.sp
 import com.jetgame.tetris.logic.LedFontFamily
 import com.jetgame.tetris.ui.theme.BrickMatrix
 import com.jetgame.tetris.ui.theme.BrickSpirit
+import java.text.DateFormat
+import java.text.SimpleDateFormat
+import java.util.*
 import kotlin.math.roundToInt
 
 
@@ -44,11 +48,9 @@ fun LedClock(modifier: Modifier = Modifier) {
     var clock by remember { mutableStateOf(0 to 0) }
 
     DisposableEffect(key1 = animateValue.roundToInt()) {
-        val totalSec = System.currentTimeMillis() / 1000
-        val totalMin = totalSec / 60
-        val curMin = totalMin % 60
-        val totalHou = totalMin / 60
-        val curHou = (totalHou + 8) % 24 //UTC+8
+        @SuppressLint("SimpleDateFormat")
+        val dateFormat: DateFormat = SimpleDateFormat("H,m")
+        val (curHou, curMin) = dateFormat.format(Date()).split(",")
         clock = curHou.toInt() to curMin.toInt()
         onDispose { }
     }
