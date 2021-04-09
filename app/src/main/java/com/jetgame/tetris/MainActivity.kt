@@ -1,10 +1,6 @@
 package com.jetgame.tetris
 
-import android.graphics.Color
 import android.os.Bundle
-import android.view.View
-import android.view.Window
-import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,14 +16,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.jetgame.tetris.logic.Action
 import com.jetgame.tetris.logic.Direction
-import com.jetgame.tetris.logic.GameStatus
 import com.jetgame.tetris.logic.GameViewModel
 import com.jetgame.tetris.logic.SoundUtil
+import com.jetgame.tetris.logic.StatusBarUtil
 import com.jetgame.tetris.ui.GameBody
 import com.jetgame.tetris.ui.GameScreen
 import com.jetgame.tetris.ui.PreviewGamescreen
@@ -38,7 +32,7 @@ import kotlinx.coroutines.channels.ticker
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        transparentStatusBar(window)
+        StatusBarUtil.transparentStatusBar(this)
         SoundUtil.init(this)
 
         setContent {
@@ -107,15 +101,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-
-    private fun transparentStatusBar(window: Window) {
-        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-        val option = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-        val vis = window.decorView.systemUiVisibility
-        window.decorView.systemUiVisibility = option or vis
-        window.statusBarColor = Color.TRANSPARENT
-    }
 
     override fun onDestroy() {
         super.onDestroy()

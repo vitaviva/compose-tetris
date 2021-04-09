@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -352,5 +353,37 @@ fun PreviewGamescreen(
 
     }
 
+
+}
+
+@Preview
+@Composable
+fun PreviewSpiritType() {
+    Row(
+        Modifier
+            .size(300.dp, 50.dp)
+            .background(ScreenBackground)
+    ) {
+        val matrix = 2 to 4
+        SpiritType.forEach {
+            Canvas(
+                Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .padding(5.dp)
+
+            ) {
+                drawBricks(
+                    Brick.of(
+                        Spirit(it).adjustOffset(matrix)
+                    ), min(
+                        size.width / matrix.first,
+                        size.height / matrix.second
+                    ), matrix
+                )
+            }
+        }
+
+    }
 
 }
