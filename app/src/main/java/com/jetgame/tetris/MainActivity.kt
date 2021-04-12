@@ -6,10 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.tooling.preview.Preview
@@ -17,17 +14,14 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.jetgame.tetris.logic.Action
-import com.jetgame.tetris.logic.Direction
-import com.jetgame.tetris.logic.GameViewModel
-import com.jetgame.tetris.logic.SoundUtil
-import com.jetgame.tetris.logic.StatusBarUtil
+import com.jetgame.tetris.logic.*
 import com.jetgame.tetris.ui.GameBody
 import com.jetgame.tetris.ui.GameScreen
 import com.jetgame.tetris.ui.PreviewGamescreen
 import com.jetgame.tetris.ui.combinedClickable
 import com.jetgame.tetris.ui.theme.ComposetetrisTheme
-import kotlinx.coroutines.channels.ticker
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,10 +35,11 @@ class MainActivity : ComponentActivity() {
                 Surface(color = MaterialTheme.colors.background) {
 
                     val viewModel = viewModel<GameViewModel>()
+                    val viewState by viewModel.viewState.collectAsState()
 
-                    val tickerChannel = remember { ticker(delayMillis = 650) }
                     LaunchedEffect(key1 = Unit) {
-                        for (event in tickerChannel) {
+                        while (isActive) {
+                            delay(650L - 55 * (viewState.level - 1))
                             viewModel.dispatch(Action.GameTick)
                         }
                     }

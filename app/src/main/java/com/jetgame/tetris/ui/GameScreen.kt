@@ -104,12 +104,11 @@ fun GameScreen(modifier: Modifier = Modifier) {
             },
             score = viewState.score,
             line = viewState.line,
+            level = viewState.level,
             isMute = viewState.isMute,
             isPaused = viewState.isPaused
         )
-
     }
-
 }
 
 
@@ -120,6 +119,7 @@ fun GameScoreboard(
     spirit: Spirit,
     score: Int = 0,
     line: Int = 0,
+    level: Int = 1,
     isMute: Boolean = false,
     isPaused: Boolean = false
 ) {
@@ -142,8 +142,8 @@ fun GameScoreboard(
 
             Spacer(modifier = Modifier.height(margin))
 
-            Text("Level", fontSize = textSize)//TODO
-            LedNumber(Modifier.fillMaxWidth(), 1, 1)
+            Text("Level", fontSize = textSize)
+            LedNumber(Modifier.fillMaxWidth(), level, 1)
 
             Spacer(modifier = Modifier.height(margin))
 
