@@ -42,7 +42,7 @@ class MainActivity : ComponentActivity() {
 
                     val viewModel = viewModel<GameViewModel>()
 
-                    val tickerChannel = remember { ticker(delayMillis = 200) }
+                    val tickerChannel = remember { ticker(delayMillis = 650) }
                     LaunchedEffect(key1 = Unit) {
                         for (event in tickerChannel) {
                             viewModel.dispatch(Action.GameTick)

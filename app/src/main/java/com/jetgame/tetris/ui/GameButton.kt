@@ -40,7 +40,7 @@ fun GameButton(
     size: Dp,
     onClick: () -> Unit = {},
     autoInvokeWhenPressed: Boolean = false,
-    content: @Composable (Modifier) -> Unit
+    content: @Composable (Modifier) -> Unit = {}
 ) {
     val backgroundShape = RoundedCornerShape(size / 2)
     lateinit var ticker: ReceiveChannel<Unit>
