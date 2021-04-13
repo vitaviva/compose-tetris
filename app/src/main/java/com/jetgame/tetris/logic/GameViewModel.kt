@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.math.min
 
 
 class GameViewModel : ViewModel() {
@@ -247,6 +248,9 @@ class GameViewModel : ViewModel() {
         val line: Int = 0,
         val isMute: Boolean = false,
     ) {
+        val level: Int
+            get() = min(10, 1 + line / 20)
+
         val spiritNext: Spirit
             get() = spiritReserve.firstOrNull() ?: Empty
 
