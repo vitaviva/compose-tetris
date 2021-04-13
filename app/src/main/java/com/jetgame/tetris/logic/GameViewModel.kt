@@ -249,7 +249,7 @@ class GameViewModel : ViewModel() {
         val isMute: Boolean = false,
     ) {
         val level: Int
-            get() = min(10, 1 + line / 5)
+            get() = min(10, 1 + line / 20)
 
         val spiritNext: Spirit
             get() = spiritReserve.firstOrNull() ?: Empty
