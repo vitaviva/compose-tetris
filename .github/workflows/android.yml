@@ -22,12 +22,18 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - name: build
-        # You may pin to the exact commit or the version.
-        # uses: vgaidarji/android-github-actions-build@0888eff41ad409a802aa4ccd7790a91891da9056
-        uses: vgaidarji/android-github-actions-build@v1.0.1
+      - name: Checkout
+        uses: actions/checkout@v2
 
-      - name: upload
+      - name: Setup JDK
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Build APK
+        run: bash ./gradlew assembleDebug --stacktrace
+      - name: Upload APK
         uses: actions/upload-artifact@v2
         with:
           name: app-debug.apk
