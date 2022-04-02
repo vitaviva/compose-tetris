@@ -60,7 +60,7 @@ import kotlin.math.min
 fun GameScreen(modifier: Modifier = Modifier) {
 
     val viewModel = viewModel<GameViewModel>()
-    val viewState by viewModel.viewState.collectAsState()
+    val viewState = viewModel.viewState.value
 
     Box(
         modifier

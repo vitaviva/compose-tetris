@@ -40,7 +40,6 @@ private fun AppIcon() {
         //Screen
         Box(Modifier.align(Alignment.CenterHorizontally)) {
 
-
             Box(
                 Modifier
                     .align(Alignment.Center)

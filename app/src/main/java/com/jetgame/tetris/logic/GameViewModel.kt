@@ -1,12 +1,13 @@
 package com.jetgame.tetris.logic
 
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jetgame.tetris.logic.Spirit.Companion.Empty
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.math.min
@@ -14,8 +15,8 @@ import kotlin.math.min
 
 class GameViewModel : ViewModel() {
 
-    private val _viewState: MutableStateFlow<ViewState> = MutableStateFlow(ViewState())
-    val viewState = _viewState.asStateFlow()
+    private val _viewState: MutableState<ViewState> = mutableStateOf(ViewState())
+    val viewState : State<ViewState> = _viewState
 
 
     fun dispatch(action: Action) =
@@ -263,15 +264,15 @@ class GameViewModel : ViewModel() {
 
 }
 
-sealed class Action {
-    data class Move(val direction: Direction) : Action()
-    object Reset : Action()
-    object Pause : Action()
-    object Resume : Action()
-    object Rotate : Action()
-    object Drop : Action()
-    object GameTick : Action()
-    object Mute : Action()
+sealed interface Action {
+    data class Move(val direction: Direction) : Action
+    object Reset : Action
+    object Pause : Action
+    object Resume : Action
+    object Rotate : Action
+    object Drop : Action
+    object GameTick : Action
+    object Mute : Action
 }
 
 enum class GameStatus {
